@@ -3,10 +3,12 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
+import { AnimController } from '../components/AnimationEngine/AnimController';
 import { ContourProjection } from '../components/Graph3D/ContourProjection';
 import { GradientArrows } from '../components/Graph3D/GradientArrows';
 import { SlicingPlane } from '../components/Graph3D/SlicingPlane';
 import { Surface3D } from '../components/Graph3D/Surface3D';
+import { mathEngine } from '../engine/MathEngine';
 import { useOrbitCamera } from '../hooks/useOrbitCamera';
 import { useCalcStore } from '../store/calcStore';
 
@@ -27,12 +29,14 @@ export function Lab3D() {
   const setSliceAxis = useCalcStore((state) => state.setSliceAxis);
   const sliceOffset = useCalcStore((state) => state.sliceOffset);
   const setSliceOffset = useCalcStore((state) => state.setSliceOffset);
+  const t = useCalcStore((state) => state.t);
 
   const [gridPoints, setGridPoints] = useState<Float32Array | null>(null);
   const [gridRes, setGridRes] = useState(resolution);
   const [sectionCurve, setSectionCurve] = useState<Array<{ x: number; z: number }>>([]);
 
   const orbit = useOrbitCamera();
+  const hasTemporal = mathEngine.hasTimeVariable(expression);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -79,6 +83,7 @@ export function Lab3D() {
           <Surface3D
             expression={expression}
             resolution={resolution}
+            time={hasTemporal ? t : 0}
             wireframe={wireframe}
             onGridData={(points, usedResolution) => {
               setGridPoints(points);
@@ -127,6 +132,7 @@ export function Lab3D() {
 
       <aside className="space-y-3 rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3">
         <h1 className="text-lg font-semibold">3D Surface Explorer</h1>
+        <AnimController active={hasTemporal} />
 
         <label className="block space-y-1 text-sm">
           <span className="text-xs text-[var(--text-dim)]">f(x, y)</span>

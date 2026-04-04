@@ -13,6 +13,10 @@ type CalculusState = {
   showSlicing: boolean;
   sliceAxis: 'xz' | 'yz';
   sliceOffset: number;
+  t: number;
+  tRange: [number, number];
+  playing: boolean;
+  speed: number;
   setX0: (value: number) => void;
   setH: (value: number) => void;
   setIntegralBounds: (bounds: [number, number]) => void;
@@ -25,7 +29,14 @@ type CalculusState = {
   toggleSlicing: () => void;
   setSliceAxis: (axis: 'xz' | 'yz') => void;
   setSliceOffset: (offset: number) => void;
+  setT: (value: number) => void;
+  setTRange: (range: [number, number]) => void;
+  setPlaying: (playing: boolean) => void;
+  setSpeed: (speed: number) => void;
+  resetTime: () => void;
 };
+
+const defaultTRange: [number, number] = [0, Math.PI * 2];
 
 export const useCalcStore = create<CalculusState>((set) => ({
   x0: 1,
@@ -40,6 +51,10 @@ export const useCalcStore = create<CalculusState>((set) => ({
   showSlicing: true,
   sliceAxis: 'xz',
   sliceOffset: 0,
+  t: 0,
+  tRange: defaultTRange,
+  playing: false,
+  speed: 1,
   setX0: (value) => set({ x0: value }),
   setH: (value) => set({ h: value }),
   setIntegralBounds: (bounds) => set({ integralBounds: bounds }),
@@ -52,4 +67,9 @@ export const useCalcStore = create<CalculusState>((set) => ({
   toggleSlicing: () => set((state) => ({ showSlicing: !state.showSlicing })),
   setSliceAxis: (sliceAxis) => set({ sliceAxis }),
   setSliceOffset: (sliceOffset) => set({ sliceOffset }),
+  setT: (t) => set({ t }),
+  setTRange: (tRange) => set({ tRange }),
+  setPlaying: (playing) => set({ playing }),
+  setSpeed: (speed) => set({ speed }),
+  resetTime: () => set((state) => ({ t: state.tRange[0] })),
 }));

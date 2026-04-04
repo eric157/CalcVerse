@@ -5,20 +5,24 @@ import { mathEngine } from '../../engine/MathEngine';
 import { validateExpression } from '../../engine/FunctionParser';
 import { useGraphStore } from '../../store/graphStore';
 
+type GraphCanvasProps = {
+  time?: number;
+};
+
 type PlotPoint = {
   x: number;
   y: number;
   dy: number;
 };
 
-function sampleFunction(expression: string, domain: [number, number], points = 2000): PlotPoint[] {
+function sampleFunction(expression: string, domain: [number, number], time: number, points = 2000): PlotPoint[] {
   const [min, max] = domain;
   const step = (max - min) / (points - 1);
   const values: PlotPoint[] = [];
 
   for (let i = 0; i < points; i += 1) {
     const x = min + i * step;
-    const y = mathEngine.evaluate(expression, { x });
+    const y = mathEngine.evaluate(expression, { x, t: time });
     values.push({ x, y, dy: Number.NaN });
   }
 
@@ -37,7 +41,7 @@ function sampleFunction(expression: string, domain: [number, number], points = 2
   return values;
 }
 
-export function GraphCanvas() {
+export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
   const functions = useGraphStore((state) => state.functions);
   const domain = useGraphStore((state) => state.domain);
 
@@ -50,7 +54,8 @@ export function GraphCanvas() {
           return null;
         }
 
-        const points = sampleFunction(validation.normalized, domain, 2000);
+        const temporal = mathEngine.hasTimeVariable(validation.normalized);
+        const points = sampleFunction(validation.normalized, domain, temporal ? time : 0, 2000);
 
         return {
           type: 'scattergl',
@@ -68,7 +73,7 @@ export function GraphCanvas() {
         } satisfies Data;
       })
       .filter((trace): trace is Data => trace !== null);
-  }, [domain, functions]);
+  }, [domain, functions, time]);
 
   const layout = useMemo<Partial<Layout>>(
     () => ({
