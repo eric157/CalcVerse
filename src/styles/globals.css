@@ -1,3 +1,5 @@
+@import './theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,16 +16,40 @@
 :root {
   color-scheme: dark;
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  background-color: #05050f;
-  color: #e2e8f0;
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #11113a 0%, #05050f 48%, #020205 100%);
+  background:
+    radial-gradient(circle at 12% 15%, rgba(124, 58, 237, 0.2), transparent 28%),
+    radial-gradient(circle at 88% 10%, rgba(6, 182, 212, 0.2), transparent 25%),
+    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-void) 65%);
 }
 
-* {
-  box-sizing: border-box;
+#root {
+  min-height: 100vh;
+}
+
+.nav-pill {
+  border: 1px solid var(--border-dim);
+  border-radius: 0.6rem;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  text-decoration: none;
+  transition: border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.nav-pill:hover,
+.nav-pill.active {
+  border-color: var(--accent-violet);
+  color: var(--text-primary);
+  box-shadow: var(--glow-violet);
 }
