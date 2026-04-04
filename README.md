@@ -56,19 +56,6 @@ Optional strict type-check:
 npm run typecheck
 ```
 
-## GitHub Pages Deployment
-
-```bash
-npm run deploy
-```
-
-Notes:
-
-- `vite.config.ts` uses `base: '/CalcVerse/'`
-- `public/404.html` handles SPA fallback redirection
-- `public/CNAME` and `public/.nojekyll` are included
-- `postbuild` writes `dist/.nojekyll`
-
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -90,10 +77,17 @@ Notes:
 
 ## Screenshots
 
-![CalcVerse Home Placeholder](https://via.placeholder.com/1280x720.png?text=CalcVerse+Home)
-![CalcVerse 2D Lab Placeholder](https://via.placeholder.com/1280x720.png?text=CalcVerse+2D+Lab)
-![CalcVerse 3D Lab Placeholder](https://via.placeholder.com/1280x720.png?text=CalcVerse+3D+Lab)
-![CalcVerse Error Lab Placeholder](https://via.placeholder.com/1280x720.png?text=CalcVerse+Error+Lab)
+![CalcVerse Home](./docs/screenshots/home.png)
+*A sleek, neon-themed entry into the mathematical universe.*
+
+![CalcVerse 2D Lab](./docs/screenshots/lab-2d.png)
+*High-performance 2D graphing with real-time derivative diagnostics.*
+
+![CalcVerse 3D Lab](./docs/screenshots/lab-3d.png)
+*Interactive 3D surface exploration with synchronized vector fields and cross-section insets.*
+
+![CalcVerse Error Lab](./docs/screenshots/error-lab.png)
+*Advanced numerical error analysis showcasing truncation and floating-point cancellation.*
 
 ## License
 
