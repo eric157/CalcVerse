@@ -27,6 +27,7 @@ type GraphState = {
   history: GraphFunction[][];
   selectedIndex: number;
   domain: [number, number];
+  setFunctions: (functions: GraphFunction[]) => void;
   setDomain: (domain: [number, number]) => void;
   addFunction: () => void;
   updateFunction: (id: string, expression: string) => void;
@@ -47,6 +48,12 @@ export const useGraphStore = create<GraphState>((set) => ({
   history: [],
   selectedIndex: 0,
   domain: [-10, 10],
+  setFunctions: (functions) =>
+    set((state) => ({
+      history: pushHistory(state.history, state.functions),
+      functions,
+      selectedIndex: 0,
+    })),
   setDomain: (domain) => set({ domain }),
   addFunction: () =>
     set((state) => {
