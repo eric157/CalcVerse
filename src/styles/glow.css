@@ -1,0 +1,25 @@
+.glow-violet {
+  box-shadow: var(--glow-violet);
+  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.35));
+}
+
+.glow-cyan {
+  box-shadow: var(--glow-cyan);
+  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.35));
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(124, 58, 237, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.25);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

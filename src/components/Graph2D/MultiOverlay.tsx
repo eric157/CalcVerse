@@ -3,6 +3,7 @@ import { useGraphStore } from '../../store/graphStore';
 
 export function MultiOverlay() {
   const functions = useGraphStore((state) => state.functions);
+  const selectedIndex = useGraphStore((state) => state.selectedIndex);
   const addFunction = useGraphStore((state) => state.addFunction);
   const updateFunction = useGraphStore((state) => state.updateFunction);
   const toggleFunction = useGraphStore((state) => state.toggleFunction);
@@ -27,6 +28,7 @@ export function MultiOverlay() {
           id={fn.id}
           expression={fn.expression}
           color={fn.color}
+          selected={functions[selectedIndex]?.id === fn.id}
           visible={fn.visible}
           onChange={updateFunction}
           onAdd={addFunction}

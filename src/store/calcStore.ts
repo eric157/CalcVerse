@@ -11,6 +11,8 @@ type CalculusState = {
   showGradientArrows: boolean;
   showContours: boolean;
   showSlicing: boolean;
+  showDerivativeOverlay: boolean;
+  showIntegralOverlay: boolean;
   sliceAxis: 'xz' | 'yz';
   sliceOffset: number;
   t: number;
@@ -27,6 +29,8 @@ type CalculusState = {
   toggleGradientArrows: () => void;
   toggleContours: () => void;
   toggleSlicing: () => void;
+  toggleDerivativeOverlay: () => void;
+  toggleIntegralOverlay: () => void;
   setSliceAxis: (axis: 'xz' | 'yz') => void;
   setSliceOffset: (offset: number) => void;
   setT: (value: number) => void;
@@ -49,6 +53,8 @@ export const useCalcStore = create<CalculusState>((set) => ({
   showGradientArrows: true,
   showContours: true,
   showSlicing: true,
+  showDerivativeOverlay: true,
+  showIntegralOverlay: true,
   sliceAxis: 'xz',
   sliceOffset: 0,
   t: 0,
@@ -65,6 +71,8 @@ export const useCalcStore = create<CalculusState>((set) => ({
   toggleGradientArrows: () => set((state) => ({ showGradientArrows: !state.showGradientArrows })),
   toggleContours: () => set((state) => ({ showContours: !state.showContours })),
   toggleSlicing: () => set((state) => ({ showSlicing: !state.showSlicing })),
+  toggleDerivativeOverlay: () => set((state) => ({ showDerivativeOverlay: !state.showDerivativeOverlay })),
+  toggleIntegralOverlay: () => set((state) => ({ showIntegralOverlay: !state.showIntegralOverlay })),
   setSliceAxis: (sliceAxis) => set({ sliceAxis }),
   setSliceOffset: (sliceOffset) => set({ sliceOffset }),
   setT: (t) => set({ t }),

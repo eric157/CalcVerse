@@ -24,6 +24,8 @@ const defaultFunctions: GraphFunction[] = [
 
 type GraphState = {
   functions: GraphFunction[];
+  history: GraphFunction[][];
+  selectedIndex: number;
   domain: [number, number];
   setDomain: (domain: [number, number]) => void;
   addFunction: () => void;
@@ -31,10 +33,19 @@ type GraphState = {
   setFunctionColor: (id: string, color: string) => void;
   toggleFunction: (id: string) => void;
   removeFunction: (id: string) => void;
+  undo: () => void;
+  cycleSelection: () => void;
 };
+
+function pushHistory(history: GraphFunction[][], current: GraphFunction[]): GraphFunction[][] {
+  const next = [...history, current.map((fn) => ({ ...fn }))];
+  return next.slice(-30);
+}
 
 export const useGraphStore = create<GraphState>((set) => ({
   functions: defaultFunctions,
+  history: [],
+  selectedIndex: 0,
   domain: [-10, 10],
   setDomain: (domain) => set({ domain }),
   addFunction: () =>
@@ -44,6 +55,7 @@ export const useGraphStore = create<GraphState>((set) => ({
       }
       const nextIndex = state.functions.length;
       return {
+        history: pushHistory(state.history, state.functions),
         functions: [
           ...state.functions,
           {
@@ -53,18 +65,22 @@ export const useGraphStore = create<GraphState>((set) => ({
             visible: true,
           },
         ],
+        selectedIndex: nextIndex,
       };
     }),
   updateFunction: (id, expression) =>
     set((state) => ({
+      history: pushHistory(state.history, state.functions),
       functions: state.functions.map((fn) => (fn.id === id ? { ...fn, expression } : fn)),
     })),
   setFunctionColor: (id, color) =>
     set((state) => ({
+      history: pushHistory(state.history, state.functions),
       functions: state.functions.map((fn) => (fn.id === id ? { ...fn, color } : fn)),
     })),
   toggleFunction: (id) =>
     set((state) => ({
+      history: pushHistory(state.history, state.functions),
       functions: state.functions.map((fn) =>
         fn.id === id
           ? {
@@ -79,6 +95,27 @@ export const useGraphStore = create<GraphState>((set) => ({
       if (state.functions.length <= 1) {
         return state;
       }
-      return { functions: state.functions.filter((fn) => fn.id !== id) };
+      const nextFunctions = state.functions.filter((fn) => fn.id !== id);
+      return {
+        history: pushHistory(state.history, state.functions),
+        functions: nextFunctions,
+        selectedIndex: Math.min(state.selectedIndex, nextFunctions.length - 1),
+      };
     }),
+  undo: () =>
+    set((state) => {
+      if (state.history.length === 0) {
+        return state;
+      }
+      const last = state.history[state.history.length - 1];
+      return {
+        functions: last,
+        history: state.history.slice(0, -1),
+        selectedIndex: Math.min(state.selectedIndex, Math.max(0, last.length - 1)),
+      };
+    }),
+  cycleSelection: () =>
+    set((state) => ({
+      selectedIndex: state.functions.length > 0 ? (state.selectedIndex + 1) % state.functions.length : 0,
+    })),
 }));

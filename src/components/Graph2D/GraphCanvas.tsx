@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data, Layout, Config } from 'plotly.js';
 import { mathEngine } from '../../engine/MathEngine';
@@ -41,6 +41,46 @@ function sampleFunction(expression: string, domain: [number, number], time: numb
   return values;
 }
 
+function injectGlow(graphDiv: HTMLElement | null) {
+  if (!graphDiv) {
+    return;
+  }
+
+  const svg = graphDiv.querySelector('svg.main-svg');
+  if (!svg) {
+    return;
+  }
+
+  let defs = svg.querySelector('defs');
+  if (!defs) {
+    defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    svg.prepend(defs);
+  }
+
+  if (!defs.querySelector('#curve-glow')) {
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    filter.setAttribute('id', 'curve-glow');
+
+    const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+    blur.setAttribute('stdDeviation', '2.2');
+    blur.setAttribute('result', 'blurred');
+
+    const merge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+    const node1 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+    node1.setAttribute('in', 'blurred');
+    const node2 = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+    node2.setAttribute('in', 'SourceGraphic');
+
+    merge.append(node1, node2);
+    filter.append(blur, merge);
+    defs.append(filter);
+  }
+
+  graphDiv.querySelectorAll('.scatterlayer .trace path.js-line').forEach((path) => {
+    path.setAttribute('filter', 'url(#curve-glow)');
+  });
+}
+
 export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
   const functions = useGraphStore((state) => state.functions);
   const domain = useGraphStore((state) => state.domain);
@@ -58,14 +98,14 @@ export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
         const points = sampleFunction(validation.normalized, domain, temporal ? time : 0, 2000);
 
         return {
-          type: 'scattergl',
+          type: 'scatter',
           mode: 'lines',
           x: points.map((p) => p.x),
           y: points.map((p) => p.y),
           customdata: points.map((p) => p.dy),
           line: {
             color: fn.color,
-            width: 2.2,
+            width: 2.3,
           },
           hovertemplate:
             "x = %{x:.4f}<br>f(x) = %{y:.4f}<br>f'(x) = %{customdata:.4f}<extra></extra>",
@@ -112,13 +152,19 @@ export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
     [],
   );
 
+  const attachGlow = useCallback((_: unknown, graphDiv: HTMLElement) => {
+    injectGlow(graphDiv);
+  }, []);
+
   return (
-    <div className="h-[55vh] min-h-[420px] rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-2">
+    <div className="h-[55vh] min-h-[420px] rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-2 glow-cyan">
       <Plot
         data={traces}
         layout={layout}
         config={config}
         useResizeHandler
+        onInitialized={attachGlow}
+        onUpdate={attachGlow}
         style={{ width: '100%', height: '100%' }}
       />
     </div>

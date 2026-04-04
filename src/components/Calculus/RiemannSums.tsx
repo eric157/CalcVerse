@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import Plot from 'react-plotly.js';
 import type { Data } from 'plotly.js';
+import { useMotionValueEvent, useSpring } from 'framer-motion';
 import { integrate, IntegrationMethod } from '../../engine/Integrator';
 import { mathEngine } from '../../engine/MathEngine';
 import { useCalcStore } from '../../store/calcStore';
+import { GlowButton } from '../UI/GlowButton';
 
 type RiemannSumsProps = {
   expression: string;
@@ -62,6 +64,13 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
   const result = useMemo(() => integrate(expression, bounds[0], bounds[1], n, method), [bounds, expression, method, n]);
   const exact = useMemo(() => integrate(expression, bounds[0], bounds[1], 4000, 'simpson').value, [bounds, expression]);
 
+  const sumSpring = useSpring(result.value, { stiffness: 90, damping: 18 });
+  const [displayValue, setDisplayValue] = useState(result.value);
+  useEffect(() => {
+    sumSpring.set(result.value);
+  }, [result.value, sumSpring]);
+  useMotionValueEvent(sumSpring, 'change', (latest) => setDisplayValue(latest));
+
   const plotData = useMemo(() => {
     const points = 500;
     const step = (bounds[1] - bounds[0]) / (points - 1);
@@ -116,16 +125,16 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
             <option value="trapezoid">Trapezoid</option>
             <option value="simpson">Simpson 1/3</option>
           </select>
-          <button
-            type="button"
+          <GlowButton
+            tone="cyan"
+            className="text-xs"
             onClick={() => {
               setN(1);
               setPlaying(true);
             }}
-            className="rounded border border-[var(--border-glow)] px-2 py-1 hover:shadow-[var(--glow-violet)]"
           >
             Animate n
-          </button>
+          </GlowButton>
         </div>
       </div>
 
@@ -169,7 +178,7 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
       />
 
       <div className="mt-2 rounded-md border border-[var(--border-dim)] bg-black/20 p-2 font-mono text-xs text-[var(--text-dim)]">
-        <p>Σ f(xi)Δx = {result.value.toFixed(8)}</p>
+        <p>Σ f(xi)Δx = {displayValue.toFixed(8)}</p>
         <p>exact reference = {exact.toFixed(8)}</p>
         <p>error = {result.error.toExponential(3)}</p>
         <p>n = {n}</p>

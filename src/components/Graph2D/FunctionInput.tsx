@@ -6,6 +6,7 @@ type FunctionInputProps = {
   id: string;
   expression: string;
   color: string;
+  selected?: boolean;
   onChange: (id: string, expression: string) => void;
   onAdd: () => void;
   onToggle: (id: string) => void;
@@ -28,6 +29,7 @@ export function FunctionInput({
   id,
   expression,
   color,
+  selected = false,
   onChange,
   onAdd,
   onToggle,
@@ -39,7 +41,11 @@ export function FunctionInput({
   const validation = useMemo(() => validateExpression(expression), [expression]);
 
   return (
-    <div className="rounded-xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3">
+    <div
+      className={`rounded-xl border bg-[var(--bg-panel)] p-3 ${
+        selected ? 'border-[var(--accent-cyan)] shadow-[var(--glow-cyan)]' : 'border-[var(--border-dim)]'
+      }`}
+    >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded-full" style={{ background: color }} />
