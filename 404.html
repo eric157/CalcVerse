@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CalcVerse Redirect</title>
+    <script>
+      (function () {
+        var basePath = '/calcverse/';
+        var locationPath = window.location.pathname;
+        var query = window.location.search || '';
+        var hash = window.location.hash || '';
+        var redirected = basePath + '?redirect=' + encodeURIComponent(locationPath + query + hash);
+        window.location.replace(redirected);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
