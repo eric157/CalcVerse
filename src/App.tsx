@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { FloatingPanel } from './components/Layout/FloatingPanel';
@@ -18,6 +19,15 @@ function AppLayout() {
   const location = useLocation();
 
   useKeyboard();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+
+    if (redirect) {
+      window.history.replaceState({}, '', redirect);
+    }
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-void)] text-[var(--text-primary)]">
