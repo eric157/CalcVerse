@@ -2,7 +2,8 @@
 
 [![Built with React](https://img.shields.io/badge/Built%20with-React%2018-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Three.js](https://img.shields.io/badge/3D-Three.js-black?logo=three.js&logoColor=white)](https://threejs.org/)
-[![Deployed on GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-222?logo=github&logoColor=white)](https://pages.github.com/)
+[![Deployed on GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-222?logo=github&logoColor=white)](https://eric157.github.io/CalcVerse/)
+[![Live App](https://img.shields.io/badge/Live-App-blueviolet?style=for-the-badge)](https://eric157.github.io/CalcVerse/)
 
 CalcVerse is a real-time mathematical universe engine for interactive graphing, calculus exploration, numerical analysis, and 3D surface investigation.
 
@@ -63,7 +64,7 @@ npm run deploy
 
 Notes:
 
-- `vite.config.ts` uses `base: process.env.NODE_ENV === 'production' ? '/calcverse/' : '/'`
+- `vite.config.ts` uses `base: '/CalcVerse/'`
 - `public/404.html` handles SPA fallback redirection
 - `public/CNAME` and `public/.nojekyll` are included
 - `postbuild` writes `dist/.nojekyll`

@@ -9,6 +9,7 @@ const links = [
 
 export function Sidebar() {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
+  const toast = useUIStore((state) => state.toast);
 
   return (
     <aside
@@ -16,17 +17,26 @@ export function Sidebar() {
         sidebarOpen ? 'w-72 p-4' : 'w-0 overflow-hidden p-0'
       }`}
     >
-      <div className="space-y-2">
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className="block rounded-xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3 transition hover:border-[var(--border-glow)] hover:shadow-[var(--glow-violet)]"
-          >
-            <p className="font-semibold text-[var(--text-primary)]">{link.title}</p>
-            <p className="mt-1 text-xs text-[var(--text-dim)]">{link.desc}</p>
-          </NavLink>
-        ))}
+      <div className="flex h-full flex-col justify-between">
+        <div className="space-y-2">
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className="block rounded-xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3 transition hover:border-[var(--border-glow)] hover:shadow-[var(--glow-violet)]"
+            >
+              <p className="font-semibold text-[var(--text-primary)]">{link.title}</p>
+              <p className="mt-1 text-xs text-[var(--text-dim)]">{link.desc}</p>
+            </NavLink>
+          ))}
+        </div>
+
+        {toast && sidebarOpen && (
+          <div className="rounded-xl border border-[var(--accent-cyan)]/30 bg-[var(--accent-cyan)]/5 p-4 animate-in fade-in slide-in-from-bottom-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-cyan)]">Context Insight</h4>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-primary)]">{toast}</p>
+          </div>
+        )}
       </div>
     </aside>
   );

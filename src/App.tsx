@@ -12,6 +12,7 @@ import { Home } from './pages/Home';
 import { Lab2D } from './pages/Lab2D';
 import { Lab3D } from './pages/Lab3D';
 import { useUIStore } from './store/uiStore';
+import { ErrorBoundary } from './components/UI/ErrorBoundary';
 
 function AppLayout() {
   const activePanel = useUIStore((state) => state.activePanel);
@@ -19,6 +20,7 @@ function AppLayout() {
   const location = useLocation();
 
   useKeyboard();
+  const toast = useUIStore((state) => state.toast);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -61,21 +63,23 @@ function AppLayout() {
         </div>
       </div>
       <KeyboardShortcuts />
-      <Toast message={null} />
+      <Toast message={toast} />
     </div>
   );
 }
 
 function App() {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<Home />} />
-        <Route path="lab-2d" element={<Lab2D />} />
-        <Route path="lab-3d" element={<Lab3D />} />
-        <Route path="error-lab" element={<ErrorLab />} />
-      </Route>
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<Home />} />
+          <Route path="lab-2d" element={<Lab2D />} />
+          <Route path="lab-3d" element={<Lab3D />} />
+          <Route path="error-lab" element={<ErrorLab />} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

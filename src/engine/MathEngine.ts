@@ -39,18 +39,42 @@ function parseDefinition(expression: string): { name: string; args: string[]; bo
 }
 
 export class MathEngine {
-  private readonly cache = new Map<string, MathNode>();
+  private readonly nodeCache = new Map<string, MathNode>();
+  private readonly compilationCache = new Map<string, EvalFunction>();
   private readonly namedFunctions = new Map<string, FunctionDefinition>();
 
-  private parseExpression(expression: string): MathNode {
-    const normalized = normalizeAbsolute(expression);
-    const cached = this.cache.get(normalized);
-    if (cached) {
-      return cached;
+  private getCompiledExpression(expression: string): EvalFunction | null {
+    const normalized = normalizeAbsolute(expression.trim());
+    if (!normalized) return null;
+
+    const cached = this.compilationCache.get(normalized);
+    if (cached) return cached;
+
+    try {
+      const parsed = math.parse(normalized);
+      const compiled = parsed.compile();
+      this.compilationCache.set(normalized, compiled);
+      this.nodeCache.set(normalized, parsed);
+      return compiled;
+    } catch {
+      return null;
     }
-    const parsed = math.parse(normalized);
-    this.cache.set(normalized, parsed);
-    return parsed;
+  }
+
+  private parseExpression(expression: string): MathNode | null {
+    const normalized = normalizeAbsolute(expression.trim());
+    if (!normalized) return null;
+
+    const cached = this.nodeCache.get(normalized);
+    if (cached) return cached;
+
+    try {
+      const parsed = math.parse(normalized);
+      this.nodeCache.set(normalized, parsed);
+      return parsed;
+    } catch {
+      return null;
+    }
   }
 
   private resolveScope(inputScope: Scope): Scope {
@@ -62,7 +86,11 @@ export class MathEngine {
         definition.args.forEach((argName, index) => {
           localScope[argName] = values[index] ?? 0;
         });
-        return Number(definition.compiled.evaluate(localScope));
+        try {
+          return Number(definition.compiled.evaluate(localScope));
+        } catch {
+          return Number.NaN;
+        }
       };
     });
 
@@ -70,38 +98,63 @@ export class MathEngine {
   }
 
   public evaluate(expression: string, scope: Scope = {}): number {
-    const definition = parseDefinition(expression);
-    if (definition) {
-      const parsed = this.parseExpression(definition.body);
-      this.namedFunctions.set(definition.name, {
-        args: definition.args,
-        compiled: parsed.compile(),
-      });
+    if (!expression.trim()) {
       return Number.NaN;
     }
 
-    const parsed = this.parseExpression(expression);
-    const resolvedScope = this.resolveScope(scope) as Record<string, MathType>;
-    const result = parsed.compile().evaluate(resolvedScope);
-
-    if (typeof result === 'number') {
-      return result;
+    const definition = parseDefinition(expression);
+    if (definition) {
+      const parsed = this.parseExpression(definition.body);
+      if (parsed) {
+        this.namedFunctions.set(definition.name, {
+          args: definition.args,
+          compiled: parsed.compile(),
+        });
+      }
+      return Number.NaN;
     }
 
-    return Number(result);
+    const compiled = this.getCompiledExpression(expression);
+    if (!compiled) {
+      return Number.NaN;
+    }
+
+    try {
+      const resolvedScope = this.resolveScope(scope) as Record<string, MathType>;
+      const result = compiled.evaluate(resolvedScope);
+
+      if (typeof result === 'number') {
+        return result;
+      }
+
+      return Number(result);
+    } catch {
+      return Number.NaN;
+    }
   }
 
   public derivative(expression: string, variable: string): string {
-    const normalized = normalizeAbsolute(expression);
-    return math.derivative(normalized, variable).toString();
+    const normalized = normalizeAbsolute(expression.trim());
+    if (!normalized) {
+      return '0';
+    }
+    try {
+      return math.derivative(normalized, variable).toString();
+    } catch {
+      return '0';
+    }
   }
 
   public clearCache(): void {
-    this.cache.clear();
+    this.nodeCache.clear();
+    this.compilationCache.clear();
   }
 
   public hasTimeVariable(expression: string): boolean {
     const node = this.parseExpression(expression);
+    if (!node) {
+      return false;
+    }
     return node.filter((child) => child.type === 'SymbolNode' && 'name' in child && child.name === 't').length > 0;
   }
 }

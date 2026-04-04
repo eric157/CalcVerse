@@ -4,10 +4,7 @@ import type { Data, Layout, Config } from 'plotly.js';
 import { mathEngine } from '../../engine/MathEngine';
 import { validateExpression } from '../../engine/FunctionParser';
 import { useGraphStore } from '../../store/graphStore';
-
-type GraphCanvasProps = {
-  time?: number;
-};
+import { useCalcStore } from '../../store/calcStore';
 
 type PlotPoint = {
   x: number;
@@ -22,7 +19,12 @@ function sampleFunction(expression: string, domain: [number, number], time: numb
 
   for (let i = 0; i < points; i += 1) {
     const x = min + i * step;
-    const y = mathEngine.evaluate(expression, { x, t: time });
+    let y: number;
+    try {
+      y = mathEngine.evaluate(expression, { x, t: time });
+    } catch {
+      y = Number.NaN;
+    }
     values.push({ x, y, dy: Number.NaN });
   }
 
@@ -81,9 +83,10 @@ function injectGlow(graphDiv: HTMLElement | null) {
   });
 }
 
-export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
+export function GraphCanvas() {
   const functions = useGraphStore((state) => state.functions);
   const domain = useGraphStore((state) => state.domain);
+  const time = useCalcStore((state) => state.t);
 
   const traces = useMemo(() => {
     return functions
@@ -95,7 +98,7 @@ export function GraphCanvas({ time = 0 }: GraphCanvasProps) {
         }
 
         const temporal = mathEngine.hasTimeVariable(validation.normalized);
-        const points = sampleFunction(validation.normalized, domain, temporal ? time : 0, 2000);
+        const points = sampleFunction(validation.normalized, domain, temporal ? time : 0, 800);
 
         return {
           type: 'scatter',

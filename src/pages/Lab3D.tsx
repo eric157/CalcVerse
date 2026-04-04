@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import Plot from 'react-plotly.js';
@@ -11,6 +11,7 @@ import { Surface3D } from '../components/Graph3D/Surface3D';
 import { mathEngine } from '../engine/MathEngine';
 import { useOrbitCamera } from '../hooks/useOrbitCamera';
 import { useCalcStore } from '../store/calcStore';
+import { SurfaceInput } from '../components/Graph3D/SurfaceInput';
 
 export function Lab3D() {
   const expression = useCalcStore((state) => state.surfaceExpression);
@@ -29,14 +30,20 @@ export function Lab3D() {
   const setSliceAxis = useCalcStore((state) => state.setSliceAxis);
   const sliceOffset = useCalcStore((state) => state.sliceOffset);
   const setSliceOffset = useCalcStore((state) => state.setSliceOffset);
-  const t = useCalcStore((state) => state.t);
 
   const [gridPoints, setGridPoints] = useState<Float32Array | null>(null);
+  const [gridGradients, setGridGradients] = useState<Float32Array | null>(null);
   const [gridRes, setGridRes] = useState(resolution);
   const [sectionCurve, setSectionCurve] = useState<Array<{ x: number; z: number }>>([]);
 
   const orbit = useOrbitCamera();
   const hasTemporal = mathEngine.hasTimeVariable(expression);
+
+  const handleGridData = useCallback((points: Float32Array, usedResolution: number, gradients: Float32Array) => {
+    setGridPoints(points);
+    setGridGradients(gradients);
+    setGridRes(usedResolution);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -83,15 +90,17 @@ export function Lab3D() {
           <Surface3D
             expression={expression}
             resolution={resolution}
-            time={hasTemporal ? t : 0}
             wireframe={wireframe}
-            onGridData={(points, usedResolution) => {
-              setGridPoints(points);
-              setGridRes(usedResolution);
-            }}
+            onGridData={handleGridData}
           />
 
-          {showGradient ? <GradientArrows expression={expression} /> : null}
+          {showGradient ? (
+            <GradientArrows
+              points={gridPoints}
+              gradients={gridGradients}
+              resolution={gridRes}
+            />
+          ) : null}
           {showContours ? <ContourProjection points={gridPoints} resolution={gridRes} /> : null}
           {showSlicing ? (
             <SlicingPlane
@@ -130,18 +139,15 @@ export function Lab3D() {
         </div>
       </div>
 
-      <aside className="space-y-3 rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3">
-        <h1 className="text-lg font-semibold">3D Surface Explorer</h1>
+      <aside className="space-y-4 overflow-y-auto rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-4 shadow-2xl">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-1 rounded bg-[var(--accent-cyan)] shadow-[var(--glow-cyan)]" />
+          <h1 className="text-xl font-bold tracking-tight">3D Surface Explorer</h1>
+        </div>
+
         <AnimController active={hasTemporal} />
 
-        <label className="block space-y-1 text-sm">
-          <span className="text-xs text-[var(--text-dim)]">f(x, y)</span>
-          <input
-            value={expression}
-            onChange={(event) => setExpression(event.target.value)}
-            className="w-full rounded border border-[var(--border-dim)] bg-[var(--bg-surface)] px-3 py-2 font-mono text-sm"
-          />
-        </label>
+        <SurfaceInput expression={expression} onChange={setExpression} />
 
         <label className="block space-y-1 text-sm">
           <span className="text-xs text-[var(--text-dim)]">Resolution ({resolution})</span>

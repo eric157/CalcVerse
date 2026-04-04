@@ -16,15 +16,13 @@ export function Lab2D() {
   const x0 = useCalcStore((state) => state.x0);
   const n = useCalcStore((state) => state.riemannN);
   const bounds = useCalcStore((state) => state.integralBounds);
-  const t = useCalcStore((state) => state.t);
 
   const hasTemporal = functions.some((fn) => mathEngine.hasTimeVariable(fn.expression));
-  const activeTime = hasTemporal ? t : 0;
 
   return (
     <section className="mx-auto grid max-w-[1600px] gap-4 p-4 xl:grid-cols-[1fr_360px]">
       <div className="space-y-4">
-        <GraphCanvas time={activeTime} />
+        <GraphCanvas />
         <SecantAnimation expression={expression} />
         <RiemannSums expression={expression} />
       </div>

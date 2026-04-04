@@ -16,8 +16,19 @@ type ExampleKey =
   | 'butterfly-curve'
   | 'periodic-gaussian';
 
+const exampleDescriptions: Record<ExampleKey, string> = {
+  none: '',
+  'gaussian-bell': 'The Normal Distribution (Bell Curve). Foundation of statistics and probability.',
+  'saddle-point': 'A 3D surface with a stationary point that is neither a local maximum nor a local minimum.',
+  'ripple-wave': 'A sinc function showing radial oscillations. Classic example of 2D wave propagation.',
+  'traveling-wave': 'A sinusoidal wave moving through time. Demonstrates the link between space and time.',
+  'butterfly-curve': 'A transcendental plane curve that looks like a butterfly. Highly sensitive to coefficients.',
+  'periodic-gaussian': 'Combines oscillation with decay. Shows how local disturbances can have wave-like properties.',
+};
+
 export function Navbar() {
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  const setToast = useUIStore((state) => state.setToast);
   const setFunctions = useGraphStore((state) => state.setFunctions);
   const setSurfaceExpression = useCalcStore((state) => state.setSurfaceExpression);
   const setPlaying = useCalcStore((state) => state.setPlaying);
@@ -29,6 +40,8 @@ export function Navbar() {
     if (key === 'none') {
       return;
     }
+
+    setToast(`Loading ${key.replace('-', ' ')}... ${exampleDescriptions[key]}`);
 
     if (key === 'gaussian-bell') {
       setFunctions([{ id: 'f1', expression: 'exp(-x^2)', color: examplePalette[0], visible: true }]);

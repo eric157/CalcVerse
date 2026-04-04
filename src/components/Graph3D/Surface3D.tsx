@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { WorkerMsg } from '../../engine/WebWorker';
+import { useCalcStore } from '../../store/calcStore';
+import { mathEngine } from '../../engine/MathEngine';
 
 type Surface3DProps = {
   expression: string;
@@ -8,8 +10,7 @@ type Surface3DProps = {
   wireframe: boolean;
   xRange?: [number, number];
   yRange?: [number, number];
-  time?: number;
-  onGridData?: (points: Float32Array, resolution: number) => void;
+  onGridData?: (points: Float32Array, resolution: number, gradients: Float32Array) => void;
 };
 
 const tempColor = new THREE.Color();
@@ -20,42 +21,79 @@ export function Surface3D({
   wireframe,
   xRange = [-6, 6],
   yRange = [-6, 6],
-  time = 0,
   onGridData,
 }: Surface3DProps) {
+  const t = useCalcStore((state) => state.t);
+  const isTemporal = useMemo(() => mathEngine.hasTimeVariable(expression), [expression]);
+  const activeTime = isTemporal ? t : 0;
   const workerRef = useRef<Worker | null>(null);
+  const onGridDataRef = useRef(onGridData);
   const [grid, setGrid] = useState<Float32Array | null>(null);
   const [workerResolution, setWorkerResolution] = useState(resolution);
+  const isBusy = useRef(false);
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL('../../engine/WebWorker.ts', import.meta.url), { type: 'module' });
-
-    workerRef.current.onmessage = (event: MessageEvent<WorkerMsg>) => {
-      const data = event.data;
-      if (data.type === 'RESULT_GRID') {
-        const points = data.points;
-        setGrid(new Float32Array(points));
-        setWorkerResolution(data.resolution);
-        onGridData?.(new Float32Array(points), data.resolution);
-      }
-    };
-
-    return () => {
-      workerRef.current?.terminate();
-      workerRef.current = null;
-    };
+    onGridDataRef.current = onGridData;
   }, [onGridData]);
 
   useEffect(() => {
-    workerRef.current?.postMessage({
+    const worker = new Worker(new URL('../../engine/WebWorker.ts', import.meta.url), { type: 'module' });
+    workerRef.current = worker;
+
+    worker.onmessage = (event: MessageEvent<WorkerMsg>) => {
+        const data = event.data;
+        if (data.type === 'RESULT_GRID') {
+          isBusy.current = false;
+          const { points, gradients, resolution: res } = data;
+          const gridData = new Float32Array(points);
+          setGrid(gridData);
+          setWorkerResolution(res);
+          onGridDataRef.current?.(gridData, res, new Float32Array(gradients));
+        }
+    };
+
+    // Trigger initial evaluation immediately
+    isBusy.current = true;
+    worker.postMessage({
       type: 'EVALUATE_GRID',
       expr: expression,
       xRange,
       yRange,
       resolution,
-      t: time,
+      t: activeTime,
     } satisfies WorkerMsg);
-  }, [expression, resolution, time, xRange, yRange]);
+
+    return () => {
+      worker.terminate();
+      workerRef.current = null;
+    };
+    // Only recreate worker if resolution changes significantly or on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const lastActiveTime = useRef(activeTime);
+
+  useEffect(() => {
+    if (workerRef.current) {
+      // If busy AND the only change was t, skip this frame to prevent backlog
+      const justTimeChanged = lastActiveTime.current !== activeTime;
+      if (isBusy.current && justTimeChanged) {
+        return;
+      }
+
+      isBusy.current = true;
+      lastActiveTime.current = activeTime;
+
+      workerRef.current.postMessage({
+        type: 'EVALUATE_GRID',
+        expr: expression,
+        xRange,
+        yRange,
+        resolution,
+        t: activeTime,
+      } satisfies WorkerMsg);
+    }
+  }, [expression, resolution, activeTime, xRange, yRange]);
 
   const geometry = useMemo(() => {
     if (!grid) {

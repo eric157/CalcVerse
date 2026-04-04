@@ -3,11 +3,15 @@ import { create, all, MathJsStatic } from 'mathjs';
 const math = create(all) as MathJsStatic;
 
 function normalizeAbsolute(expression: string): string {
-  let normalized = expression;
   const absPattern = /\|([^|]+)\|/g;
-  while (absPattern.test(normalized)) {
+  let normalized = expression;
+  let previous = '';
+
+  while (normalized !== previous) {
+    previous = normalized;
     normalized = normalized.replace(absPattern, 'abs($1)');
   }
+
   return normalized;
 }
 

@@ -32,9 +32,13 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
   const setBounds = useCalcStore((state) => state.setIntegralBounds);
   const n = useCalcStore((state) => state.riemannN);
   const setN = useCalcStore((state) => state.setRiemannN);
+  const t = useCalcStore((state) => state.t);
 
   const [method, setMethod] = useState<IntegrationMethod>('left');
   const [playing, setPlaying] = useState(false);
+
+  const isTemporal = useMemo(() => mathEngine.hasTimeVariable(expression), [expression]);
+  const activeTime = isTemporal ? t : 0;
 
   useEffect(() => {
     if (!playing) {
@@ -61,8 +65,8 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
     };
   }, [playing, setN]);
 
-  const result = useMemo(() => integrate(expression, bounds[0], bounds[1], n, method), [bounds, expression, method, n]);
-  const exact = useMemo(() => integrate(expression, bounds[0], bounds[1], 4000, 'simpson').value, [bounds, expression]);
+  const result = useMemo(() => integrate(expression, bounds[0], bounds[1], n, method, activeTime), [bounds, expression, method, n, activeTime]);
+  const exact = useMemo(() => integrate(expression, bounds[0], bounds[1], 1024, 'simpson', activeTime).value, [bounds, expression, activeTime]);
 
   const sumSpring = useSpring(result.value, { stiffness: 90, damping: 18 });
   const [displayValue, setDisplayValue] = useState(result.value);
@@ -72,7 +76,7 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
   useMotionValueEvent(sumSpring, 'change', (latest) => setDisplayValue(latest));
 
   const plotData = useMemo(() => {
-    const points = 500;
+    const points = 400; // Reduced from 500
     const step = (bounds[1] - bounds[0]) / (points - 1);
 
     const xCurve: number[] = [];
@@ -81,7 +85,7 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
     for (let i = 0; i < points; i += 1) {
       const x = bounds[0] + i * step;
       xCurve.push(x);
-      yCurve.push(mathEngine.evaluate(expression, { x }));
+      yCurve.push(mathEngine.evaluate(expression, { x, t: activeTime }));
     }
 
     const curveTrace: Data = {
@@ -107,7 +111,7 @@ export function RiemannSums({ expression }: RiemannSumsProps) {
     };
 
     return [curveTrace, rectTrace];
-  }, [bounds, expression, method, result.rectangles]);
+  }, [bounds, expression, method, result.rectangles, activeTime]);
 
   return (
     <div className="rounded-2xl border border-[var(--border-dim)] bg-[var(--bg-panel)] p-3">

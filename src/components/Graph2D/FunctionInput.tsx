@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { validateExpression } from '../../engine/FunctionParser';
 import { MathInput } from '../UI/MathInput';
 
@@ -36,9 +36,24 @@ export function FunctionInput({
   onRemove,
   visible,
 }: FunctionInputProps) {
+  const [localValue, setLocalValue] = useState(expression);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const validation = useMemo(() => validateExpression(expression), [expression]);
+  // Sync internal state if the prop changes from outside (e.g., suggestions or undo)
+  useEffect(() => {
+    setLocalValue(expression);
+  }, [expression]);
+
+  // Debounced update to the store
+  useEffect(() => {
+    if (localValue === expression) return;
+    const timer = setTimeout(() => {
+      onChange(id, localValue);
+    }, 240); // Standard human-speed debounce
+    return () => clearTimeout(timer);
+  }, [id, localValue, onChange, expression]);
+
+  const validation = useMemo(() => validateExpression(localValue), [localValue]);
 
   return (
     <div
@@ -50,20 +65,25 @@ export function FunctionInput({
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded-full" style={{ background: color }} />
           <span className="text-xs text-[var(--text-dim)]">{id.toUpperCase()}</span>
-          <span className="text-xs">{validation.isValid ? 'OK' : 'ERR'}</span>
+          <span className="text-xs font-medium space-x-1">
+            <span className={validation.isValid ? 'text-emerald-400' : 'text-red-400'}>
+              {validation.isValid ? '✓' : '✗'}
+            </span>
+            <span className="text-xs text-[var(--text-dim)]">{validation.isValid ? 'READY' : 'INVALID'}</span>
+          </span>
         </div>
         <div className="flex items-center gap-1 text-xs">
           <button
             type="button"
             onClick={() => onToggle(id)}
-            className="rounded border border-[var(--border-dim)] px-2 py-1 hover:border-[var(--accent-cyan)]"
+            className="rounded border border-[var(--border-dim)] px-2 py-1 hover:border-[var(--accent-cyan)] transition-colors"
           >
             {visible ? 'Hide' : 'Show'}
           </button>
           <button
             type="button"
             onClick={() => onRemove(id)}
-            className="rounded border border-[var(--border-dim)] px-2 py-1 hover:border-red-400"
+            className="rounded border border-[var(--border-dim)] px-2 py-1 hover:border-red-400 transition-colors"
           >
             Remove
           </button>
@@ -71,8 +91,8 @@ export function FunctionInput({
       </div>
 
       <MathInput
-        value={expression}
-        onChange={(next) => onChange(id, next)}
+        value={localValue}
+        onChange={setLocalValue}
         placeholder="Enter f(x)..."
         isValid={validation.isValid}
         error={validation.errorMessage}
