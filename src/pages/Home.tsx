@@ -19,6 +19,16 @@ const cards = [
     desc: 'See truncation and floating-point cancellation interact.',
     to: '/error-lab',
   },
+  {
+    title: 'Matrix Lab',
+    desc: 'Animate 2x2 transforms with determinant and eigenvalue calculations.',
+    to: '/matrix-lab',
+  },
+  {
+    title: 'N-Link Pendulum',
+    desc: 'Simulate chaotic coupled pendulums with live energy metrics.',
+    to: '/pendulum-lab',
+  },
 ];
 
 export function Home() {
@@ -34,7 +44,7 @@ export function Home() {
         <p className="mt-3 text-sm text-[var(--text-dim)]">Make math feel alive.</p>
       </motion.div>
 
-      <div className="grid w-full max-w-5xl gap-4 md:grid-cols-3">
+      <div className="grid w-full max-w-6xl gap-4 md:grid-cols-2 xl:grid-cols-5">
         {cards.map((card, index) => (
           <motion.article
             key={card.title}

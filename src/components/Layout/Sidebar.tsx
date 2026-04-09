@@ -4,6 +4,8 @@ import { useUIStore } from '../../store/uiStore';
 const links = [
   { to: '/lab-2d', title: '2D Calculus Lab', desc: 'Functions, tangents, integrals' },
   { to: '/lab-3d', title: '3D Surface Explorer', desc: 'Surfaces, vectors, slices' },
+  { to: '/matrix-lab', title: 'Matrix Lab', desc: 'Linear transformations and eigen-analysis' },
+  { to: '/pendulum-lab', title: 'N-Link Pendulum', desc: 'Chaotic coupled dynamics + energy' },
   { to: '/error-lab', title: 'Error Analytics', desc: 'Numerical stability insights' },
 ];
 

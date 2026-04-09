@@ -11,6 +11,8 @@ import { ErrorLab } from './pages/ErrorLab';
 import { Home } from './pages/Home';
 import { Lab2D } from './pages/Lab2D';
 import { Lab3D } from './pages/Lab3D';
+import { MatrixLab } from './pages/MatrixLab';
+import { PendulumLab } from './pages/PendulumLab';
 import { useUIStore } from './store/uiStore';
 import { ErrorBoundary } from './components/UI/ErrorBoundary';
 
@@ -77,6 +79,8 @@ function App() {
           <Route path="lab-2d" element={<Lab2D />} />
           <Route path="lab-3d" element={<Lab3D />} />
           <Route path="error-lab" element={<ErrorLab />} />
+          <Route path="matrix-lab" element={<MatrixLab />} />
+          <Route path="pendulum-lab" element={<PendulumLab />} />
         </Route>
       </Routes>
     </ErrorBoundary>

@@ -14,7 +14,9 @@ type ExampleKey =
   | 'ripple-wave'
   | 'traveling-wave'
   | 'butterfly-curve'
-  | 'periodic-gaussian';
+  | 'periodic-gaussian'
+  | 'matrix-transform'
+  | 'n-link-pendulum';
 
 const exampleDescriptions: Record<ExampleKey, string> = {
   none: '',
@@ -24,6 +26,8 @@ const exampleDescriptions: Record<ExampleKey, string> = {
   'traveling-wave': 'A sinusoidal wave moving through time. Demonstrates the link between space and time.',
   'butterfly-curve': 'A transcendental plane curve that looks like a butterfly. Highly sensitive to coefficients.',
   'periodic-gaussian': 'Combines oscillation with decay. Shows how local disturbances can have wave-like properties.',
+  'matrix-transform': 'Animated linear algebra transformations with determinant and eigenvalue calculations.',
+  'n-link-pendulum': 'Coupled non-linear pendulum chain simulation with RK4 and energy metrics.',
 };
 
 export function Navbar() {
@@ -86,6 +90,16 @@ export function Navbar() {
       navigate('/lab-2d');
     }
 
+    if (key === 'matrix-transform') {
+      setPlaying(false);
+      navigate('/matrix-lab');
+    }
+
+    if (key === 'n-link-pendulum') {
+      setPlaying(false);
+      navigate('/pendulum-lab');
+    }
+
     event.target.value = 'none';
   };
 
@@ -118,12 +132,20 @@ export function Navbar() {
             <option value="traveling-wave">Traveling Wave</option>
             <option value="butterfly-curve">Butterfly Curve</option>
             <option value="periodic-gaussian">Periodic Gaussian</option>
+            <option value="matrix-transform">Matrix Transform</option>
+            <option value="n-link-pendulum">N-Link Pendulum</option>
           </select>
           <NavLink className="nav-pill" to="/lab-2d">
             2D Lab
           </NavLink>
           <NavLink className="nav-pill" to="/lab-3d">
             3D Lab
+          </NavLink>
+          <NavLink className="nav-pill" to="/matrix-lab">
+            Matrix Lab
+          </NavLink>
+          <NavLink className="nav-pill" to="/pendulum-lab">
+            Pendulum Lab
           </NavLink>
           <NavLink className="nav-pill" to="/error-lab">
             Error Lab

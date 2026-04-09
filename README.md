@@ -32,6 +32,8 @@ flowchart LR
 - 🌐 3D explorer with worker-driven surfaces, gradient arrows, contours, slicing planes, and cross-section inset chart
 - 🎬 Global animation engine (`t`) with play/pause/reset/speed controls
 - 📊 Error analytics lab with log-log finite-difference error curves, optimal `h`, and configurable noise/smoothing
+- 🧮 Matrix transformation lab with animated 2x2 linear algebra, determinant, trace, and eigenvalue calculations
+- 🪢 N-link pendulum lab with RK4 integration, energy tracking, and coupled motion trails
 - ✨ Neon glow design system, Framer Motion transitions, and keyboard-driven interaction model
 
 ## Built-in Examples
@@ -42,6 +44,8 @@ flowchart LR
 - Traveling Wave: `sin(x - t)` (2D animated)
 - Butterfly Curve: `exp(cos(x)) - 2*cos(4x) - sin(x/12)^5` (2D)
 - Periodic Gaussian: `sin(x)*exp(-x^2/10)` (2D + integral)
+- Matrix Transform: 2x2 matrix animation and eigen-analysis
+- N-Link Pendulum: coupled dynamics and energy simulation
 
 ## Local Development
 
